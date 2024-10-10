@@ -1,0 +1,12 @@
+.ipynb_checkpoints/
+checkpoints
+__pycache__
+test
+
+*.pth
+*.csv
+*.pyc
+*.onnx
+*.trt
+*.zip
+*.npy

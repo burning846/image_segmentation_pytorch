@@ -1,0 +1,100 @@
+# training_config.yaml
+base:
+  context: train
+
+train:
+  epochs: 500                     # 训练的总轮数
+  batch_size: 32                 # 每次训练的批量大小
+  learning_rate: 0.0001           # 学习率
+  optimizer: AdamW               # 优化器类型（如 SGD、Adam 等）
+  scheduler: StepLR              # 学习率调度器
+  step_size: 100                  # 每隔多少个 epoch 减少学习率
+  gamma: 0.1                     # 学习率衰减的系数
+  weight_decay: 0.0001           # 权重衰减（L2 正则化）
+  loss_function:
+    - RetinaFaceLoss
+  checkpoint_dir: ./checkpoints
+  save_frequency: 5               # 每隔多少个 epoch 保存一次模型
+
+image_processing:
+  train:
+    horizontal_flip: 0.5
+    rotation: 2                            # 旋转角度
+    colorjitter:
+      hue: 0.1
+      brightness: 0.2                       # 调整亮度
+      contrast: 0.2                         # 调整对比度
+      saturation: 0.2
+    resize:
+      image_width: 640
+      image_height: 640
+    totensor: True
+    normalization:
+      mean: [104, 117, 123]         # 数据归一化的标准差
+  val:
+    resize:
+      image_width: 640
+      image_height: 640
+    totensor: True
+    normalization:
+      mean: [104, 117, 123]
+  test:
+    resize:
+      image_width: 640
+      image_height: 640
+    totensor: True
+    normalization:
+      mean: [104, 117, 123]
+  
+
+loss:
+  RetinaFaceLoss:
+    alpha: 1.0
+    beta: 1.0
+    gamma: 1.0
+    iou_threshold: 0.5
+
+data:
+  dataset: FaceDetDataset
+  name: celeba
+  train_data_path: celeba/celeba_v1_train.csv
+  val_data_path: celeba/celeba_v1_val.csv
+  test_data_path: celeba/celeba_v1_test.csv
+
+model:
+  name: retinaface
+  input_size: [640, 640]                      # 模型接受的输入尺寸
+  backbone: Resnet50
+  min_sizes: [[16, 32], [64, 128], [256, 512]]
+  steps: [8, 16, 32]
+  variance: [0.1, 0.2]
+  clip: False
+  loc_weight: 2.0
+  return_layers: 
+    layer2: 1 
+    layer3: 2 
+    layer4: 3
+  in_channel: 256
+  out_channel: 256
+  pretrain: True
+  pretrained_weights:  # 预训练权重文件的路径
+
+environment:
+  device: cuda                        # 使用的设备（如 cuda 或 cpu）
+  num_gpus: 1                         # 使用的 GPU 数量
+  distributed: False                  # 是否启用分布式训练
+  seed: 42                            # 随机数种子（用于确保可重复性）
+  num_workers: 8                      # 数据加载时的并行线程数
+  pin_memory: True                    # 是否固定内存（提升数据加载性能）
+  amp: True                           # 是否启用混合精度训练
+
+# experiment_config.yaml
+
+experiment:
+  experiment_name: 'face_detection_01'
+  description: 'retinaface'
+  version: '1.0.0'
+  save_checkpoints: True              # 是否保存训练中的检查点
+  save_best_model: True               # 是否保存最佳模型
+  early_stopping: True                # 是否启用早停
+  patience: 10                        # 早停的耐心（多少个 epoch 不提升就停止）
