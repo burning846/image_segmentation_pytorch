@@ -14,12 +14,12 @@ def build_dataset(config, context='train', preproc=None):
 
     if dataset_name == 'FaceDetDataset':
         from datasets.face_det import FaceDetectionDataset
-        dataset = FaceDetectionDataset(config['data']['train_data_path'], preproc=preproc)
+        dataset = FaceDetectionDataset(config['data'][f'{context}_data_path'], preproc=preproc)
         dataloader = data.DataLoader(dataset, batch_size=config['train']['batch_size'], shuffle=shuffle, num_workers=config['environment']['num_workers'])
 
-    if dataset_name == 'CardSegmentDataset':
+    elif dataset_name == 'CardSegmentDataset':
         from datasets.card_seg import CardSegmentationDataset
-        dataset = CardSegmentationDataset(config['data']['train_data_path'], config['image_processing']['train'])
+        dataset = CardSegmentationDataset(config['data'][f'{context}_data_path'], config['image_processing'][context])
         dataloader = data.DataLoader(dataset, batch_size=config['train']['batch_size'], shuffle=shuffle, num_workers=config['environment']['num_workers'])
         
     else:
